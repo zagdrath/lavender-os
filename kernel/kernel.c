@@ -1,4 +1,4 @@
-#include <../include/tty.h>
+#include <tty.h>
 #include <stdio.h>
 
 void kernel_main(void) {

@@ -12,6 +12,8 @@ $(KERNEL_DIR)/drivers/tty.c \
 $(KERNEL_DIR)/include/tty.h \
 $(KERNEL_DIR)/include/vga.h \
 $(KERNEL_DIR)/kernel.c \
+
+LIBC_FILES=\
 $(LIBC_DIR)/include/sys/cdefs.h \
 $(LIBC_DIR)/include/stdio.h \
 $(LIBC_DIR)/include/stdlib.h \
@@ -26,15 +28,19 @@ $(LIBC_DIR)/string/memmove.c \
 $(LIBC_DIR)/string/memset.c \
 $(LIBC_DIR)/string/strlen.c \
 
-all: kernel iso
+all: build_libc build_kernel build_iso
 
-kernel:
-	mkdir build
+build_libc:
+	i686-elf-gcc $(LIBC_FILES) -o libc.o
+
+build_kernel:
+	mkdir -p build
+	mkdir -p build/kernel
 	i686-elf-as $(ARCH_FILES) -o build/kernel/boot.o
 	i686-elf-gcc $(KERNEL_FILES) -o build/kernel.o -std=gnu99 -ffreestanding -O2 -nostdlib -Wall -Wextra -r
 	i686-elf-gcc -T kernel/arch/i386/linker.ld -o build/lavender.bin -ffreestanding -O2 -nostdlib build/boot.o build/kernel.o -lgcc
 
-iso:
+build_iso:
 	mkdir -p build/boot
 	mkdir -p build/boot/grub
 	mv build/lavender.bin build/boot/lavender.bin
@@ -45,5 +51,6 @@ iso:
 	EOF
 	mv grub.cfg build/boot/grub/grub.cfg
 	grub-mkrescue -o build/boot/lavender.iso build
+
 clean:
 	rm -rf build/
